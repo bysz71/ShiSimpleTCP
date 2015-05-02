@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <winsock2.h>
+#include "mylib.c"
 #include "UDP_supporting_functions_2015.c"
 
 #define BUFFESIZE 80
@@ -88,6 +89,7 @@ int main(int argc, char *argv[]) {
 	//--open file to save
 	FILE *fout=fopen("file1_saved.txt","w");
 
+    int expectedsenum = 0;
 	while (1) {
         //--receive
 		bytes = recvfrom(s, receive_buffer, SEGMENTSIZE, 0,(struct sockaddr *)(&remoteaddr),&addrlen);
@@ -110,10 +112,15 @@ int main(int argc, char *argv[]) {
 		printf("RECEIVED --> %s \n",receive_buffer);
 
 /////////
+        //extract crc in integer
+        char tok[80] = "";
+        char rest[80] = "";
+        mytok(receive_buffer , tok ,rest);
         int crc;
-        crc = getcrc(receive_buffer);
-        char* rest;
-        rest = getrest(receive_buffer);
+        crc = atoi(tok);
+        //compute crc for rest
+        int crc_compute;
+        crc_compute = (int)CRCpolynomial(rest);
 
 
 
