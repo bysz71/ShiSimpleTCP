@@ -140,11 +140,12 @@ int main(int argc, char *argv[]) {
                     make_pkt(seqnum,"CLS","\n",send_buffer);
                     send_unreliably(s,send_buffer,remoteaddr);
                     printf("file recv finished, closing...\n");
+                    //Sleep(2000);
                     break;
                 }
             }
             else{
-                printf("seqnum at expected\n");
+                printf("seqnum not expected\n");
                 send_unreliably(s,send_buffer,remoteaddr);
             }
         }else{

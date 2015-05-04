@@ -1,9 +1,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdbool.h>
 #include "CRC_simple.c"
 #define MAX_SIZE 78
 
+typedef struct Timer{
+    bool start;
+    int count;
+    int limit;
+}Timer;
 void print_char_array(char array[][MAX_SIZE]);
 
 void scttok(const char* source, char* tok, char* rest){
