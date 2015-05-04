@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
         memset(sndpkt[memsetcount],0,sizeof(sndpkt[memsetcount]));
     }
     buffer_file_to_array(sndpkt,fin);
-    char_array_pktize(sndpkt,"PACKET ");
+    char_array_pktize(sndpkt);
     print_char_array(sndpkt);
     printf("----------------test good------------------\n");
     Sleep(1000);

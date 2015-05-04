@@ -4,6 +4,7 @@
 #include <winsock2.h>
 
 #include "UDP_supporting_functions_2015.c"
+#include "sctbase.c"
 
 #define BUFFESIZE 80
 #define SEGMENTSIZE 78
@@ -84,6 +85,13 @@ int main(int argc, char *argv[]) {
 
 
 //start++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    int crc_rcv=0;
+    int crc_computed = 0;
+    char message[78]="";
+    char header[78]="";
+    int seqnum = 0;
+    char data[78]="";
+
 	FILE *fout=fopen("file1_saved.txt","w");
 	while (1) {
         printf("\n================================================\n");
@@ -104,6 +112,17 @@ int main(int argc, char *argv[]) {
 		}
 		if ((bytes < 0) || (bytes == 0)) break;
 		printf("RECEIVED --> %s \n",receive_buffer);
+
+        memset(message,0,sizeof(message));
+        memset(header,0,sizeof(header));
+        memset(data,0,sizeof(data));
+        crc_rcv = 0;
+        crc_rcv = get_crc_op_rest(receive_buffer,message);
+        printf("crc fine\n");
+        seqnum = 0;
+        seqnum = get_seqnum_op_header_data(message,header,data);
+        printf("seqnum fine\n");
+        printf("crc_rcv-%d-\nheader-%s-\nseqnum-%d-\ndata-%s\n",crc_rcv,header,seqnum,data);
 
 		if (strncmp(receive_buffer,"PACKET",6)==0)  {
 			sscanf(receive_buffer, "PACKET %d",&counter);

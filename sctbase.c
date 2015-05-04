@@ -6,7 +6,25 @@
 
 void print_char_array(char array[][MAX_SIZE]);
 
+void scttok(const char* source, char* tok, char* rest){
+    if(strlen(source)==0)
+        return;
+    char cpy[MAX_SIZE];
+    strcpy(cpy,source);
 
+    int n = 0;
+    for(;cpy[n]!=' ';n++)
+        tok[n] = cpy[n];
+    tok[n] = '\0';
+
+    n++;
+    int m = 0;
+    for(;n < strlen(source) ; n++){
+        rest[m] = source[n];
+        m++;
+    }
+    rest[m] = '\0';
+}
 
 void buffer_file_to_array(char strarr[][MAX_SIZE] , FILE *fin){
     char temp[70] = "";
@@ -36,7 +54,7 @@ void print_char_array(char array[][MAX_SIZE]){
 
 void make_pkt(int nextseqnum , const char* header , const char* data ,char* pkt ){
     char temp[78]="";
-    sprintf(temp , header , nextseqnum);
+    sprintf(temp , "%s %d " ,header, nextseqnum);
     strcat(temp,data);
     int crc;
     crc = (int)CRCpolynomial(temp);
@@ -44,11 +62,11 @@ void make_pkt(int nextseqnum , const char* header , const char* data ,char* pkt 
     strcat(pkt,temp);
 }
 
-void char_array_pktize(char array[][MAX_SIZE] , char* header){
+void char_array_pktize(char array[][MAX_SIZE]){
     int n = 0;
     for(;n<100;n++){
         if(strlen(array[n])>0)
-            make_pkt(n,header,array[n],array[n]);
+            make_pkt(n,"PACKET",array[n],array[n]);
         else{
             make_pkt(n,"CLOSE","\n",array[n]);
             break;
@@ -56,3 +74,24 @@ void char_array_pktize(char array[][MAX_SIZE] , char* header){
     }
 
 }
+
+int get_crc_op_rest(const char* pkt, char* message){
+    char tok[MAX_SIZE];
+    scttok(pkt,tok,message);
+    int crc;
+    crc =atoi(tok);
+    return crc;
+}
+
+int get_seqnum_op_header_data(const char* source,char* header, char* data){
+    char tok[MAX_SIZE];
+    char rest[MAX_SIZE];
+    int seqnum = 0;
+    scttok(source,tok,rest);
+    strcpy(header,tok);
+    scttok(rest,tok,data);
+    seqnum = atoi(tok);
+
+    return seqnum;
+}
+
