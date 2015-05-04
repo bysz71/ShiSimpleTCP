@@ -103,3 +103,29 @@ int compute_crc_with_newline(const char* message){
     crc = (int)CRCpolynomial(temp);
     return crc;
 }
+
+void save_line(char* buffer , FILE *fout){
+    char temp[78];
+    char tok_buffer[78];
+    char rest_buffer[78];
+    scttok(buffer,tok_buffer,rest_buffer);
+    scttok(rest_buffer,tok_buffer,rest_buffer);
+    strcpy(temp,rest_buffer);
+    printf("DATA: %s\n",temp);
+    if(fout!=NULL) {
+        fprintf(fout,"%s\n",temp);
+        printf("syst: line saved:%s\n",temp);
+    }
+    else{
+        printf("error during writing...\n");
+        exit(0);
+    }
+}
+
+int get_ack_op_stats(const char* message , char* stats){
+    char rest[78];
+    scttok(message,stats,rest);
+    int ack = 0;
+    ack = atoi(rest);
+    return ack;
+}

@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 
 	SOCKET s;
 
-	char send_buffer[BUFFESIZE],receive_buffer[BUFFESIZE];
+	char receive_buffer[BUFFESIZE];
 	int n,bytes,addrlen;
 	addrlen = sizeof(remoteaddr);
 	memset(&localaddr,0,sizeof(localaddr));//clean up the structure
@@ -90,7 +90,10 @@ int main(int argc, char *argv[]) {
     char message[78]="";
     char header[78]="";
     int seqnum = 0;
+    int expectseqnum = 0;
     char data[78]="";
+    char send_buffer[BUFFESIZE] = "ACK -1 ";
+
 
 	FILE *fout=fopen("file1_saved.txt","w");
 	while (1) {
@@ -118,12 +121,38 @@ int main(int argc, char *argv[]) {
         memset(data,0,sizeof(data));
         crc_rcv = 0;
         crc_rcv = get_crc_op_rest(receive_buffer,message);
+        crc_cal = 0;
         crc_cal = compute_crc_with_newline(message);
-        printf("crc_cal-%d-\n",crc_cal);
         seqnum = 0;
         seqnum = get_seqnum_op_header_data(message,header,data);
         //printf("crc_rcv-%d-\nheader-%s-\nseqnum-%d-\ndata-%s\n",crc_rcv,header,seqnum,data);
 
+        if(crc_rcv==crc_cal){
+            if(seqnum==expectseqnum){
+                if(strcmp(header,"PACKET")==0){
+                    save_line(data,fout);
+                    memset(send_buffer,0,sizeof(send_buffer));
+                    make_pkt(seqnum,"ACK","\n",send_buffer);
+                    send_unreliably(s,send_buffer,remoteaddr);
+                    expectseqnum++;
+                }else if(strcmp(header,"CLOSE")==0){
+                    memset(send_buffer,0,sizeof(send_buffer));
+                    make_pkt(seqnum,"CLS","\n",send_buffer);
+                    send_unreliably(s,send_buffer,remoteaddr);
+                    printf("file recv finished, closing...\n");
+                    break;
+                }
+            }
+            else{
+                printf("seqnum at expected\n");
+                send_unreliably(s,send_buffer,remoteaddr);
+            }
+        }else{
+            printf("crc not match\n");
+            send_unreliably(s,send_buffer,remoteaddr);
+        }
+
+/*
 		if (strncmp(receive_buffer,"PACKET",6)==0)  {
 			sscanf(receive_buffer, "PACKET %d",&counter);
 			sprintf(send_buffer,"ACKNOW %d \r\n",counter);
@@ -146,6 +175,7 @@ int main(int argc, char *argv[]) {
 			//do nothing, ignoring the damaged packet? Or send a negative ACK? It is up to you to decide.
 			}
 		}
+*/
 	}
 //end+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	closesocket(s);

@@ -8,7 +8,10 @@
 #define NUMBER_OF_WORDS_IN_THE_HEADER 2
 
 int main(){
-
+    char buffer[78] = "ACK 0 ";
+    int i;
+    i = (int)CRCpolynomial(buffer);
+    printf("%d",i);
 /*
 //-get_seqnum_output_header_data--
     char buffer[78] = "PACKET 6 this is the data\n";

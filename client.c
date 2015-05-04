@@ -75,12 +75,56 @@ int main(int argc, char *argv[]) {
     Sleep(1000);
 
 
-//*my loop
+//my loop -- with ack verification and resend
+    int nextseqnum = 0;
+    int ack = -1;
+    int crc_rcv = 0;
+    int crc_cal = 0;
+    char message[78] = "";
+    char stats[78] = "";
+
+    while(1){
+        if(strlen(sndpkt[nextseqnum])>0){
+            send_unreliably(s,sndpkt[nextseqnum],remoteaddr);
+            //printf("%d pkt--%s-- sent\n",nextseqnum,sndpkt[nextseqnum]);
+            Sleep(400);
+
+            memset(receive_buffer, 0, sizeof(receive_buffer));
+            recv_nonblocking(s,receive_buffer, remoteaddr);
+            printf("RECEIVE --> %s \n",receive_buffer);
+
+            memset(message,0,sizeof(message));
+            crc_rcv = get_crc_op_rest(receive_buffer,message);
+            printf("crc_rcv:%d\n",crc_rcv);
+            //crc_cal = (int)CRCpolynomial(message);
+            crc_cal = compute_crc_with_newline(message);    //receive_nonblocking() contains the function to get rid of \n
+            printf("crc_cal:%d\n",crc_cal);
+            ack = get_ack_op_stats(message,stats);
+            printf("ack:%d\n",ack);
+            printf("stats:%s\n",stats);
+
+            if(crc_rcv == crc_cal){
+                if(ack == nextseqnum)
+                    nextseqnum++;
+
+            }
+            Sleep(400);
+        }else{
+            printf("at %d, end reached\n",nextseqnum);
+            break;
+
+        }
+    }
+
+
+
+//*my loop -- simplest one
+/*
     int nextseqnum = 0;
     while(1){
         if(strlen(sndpkt[nextseqnum])>0){
             send_unreliably(s,sndpkt[nextseqnum],remoteaddr);
-            printf("%d pkt--%s-- sent\n",nextseqnum,sndpkt[nextseqnum]);
+            //printf("%d pkt--%s-- sent\n",nextseqnum,sndpkt[nextseqnum]);
             nextseqnum++;
             Sleep(400);
 
@@ -89,7 +133,7 @@ int main(int argc, char *argv[]) {
             printf("RECEIVE --> %s \n",receive_buffer);
             Sleep(400);
         }else{
-            printf("at %d, end reached\n");
+            printf("at %d, end reached\n",nextseqnum);
             break;
 
         }
