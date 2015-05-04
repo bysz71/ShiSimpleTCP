@@ -95,3 +95,11 @@ int get_seqnum_op_header_data(const char* source,char* header, char* data){
     return seqnum;
 }
 
+int compute_crc_with_newline(const char* message){
+    int crc;
+    char temp[78];
+    strcpy(temp,message);
+    strcat(temp,"\n");
+    crc = (int)CRCpolynomial(temp);
+    return crc;
+}

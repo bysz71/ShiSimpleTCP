@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 
 //start++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     int crc_rcv=0;
-    int crc_computed = 0;
+    int crc_cal = 0;
     char message[78]="";
     char header[78]="";
     int seqnum = 0;
@@ -118,11 +118,11 @@ int main(int argc, char *argv[]) {
         memset(data,0,sizeof(data));
         crc_rcv = 0;
         crc_rcv = get_crc_op_rest(receive_buffer,message);
-        printf("crc fine\n");
+        crc_cal = compute_crc_with_newline(message);
+        printf("crc_cal-%d-\n",crc_cal);
         seqnum = 0;
         seqnum = get_seqnum_op_header_data(message,header,data);
-        printf("seqnum fine\n");
-        printf("crc_rcv-%d-\nheader-%s-\nseqnum-%d-\ndata-%s\n",crc_rcv,header,seqnum,data);
+        //printf("crc_rcv-%d-\nheader-%s-\nseqnum-%d-\ndata-%s\n",crc_rcv,header,seqnum,data);
 
 		if (strncmp(receive_buffer,"PACKET",6)==0)  {
 			sscanf(receive_buffer, "PACKET %d",&counter);
