@@ -1,3 +1,12 @@
+//12238967 Clark Zhang
+//sorry Sir, the definitions for unix and apple systems were
+//removed for reading convenience, please compile under win32.
+//All other files in the folder are required for compilation.
+//under terrible network environment, the smaller window size,
+//the better performance. I think it is because with high
+//probability of invalid packet, small windows size sends less
+//redundant packets which will be discarded anyway
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -116,6 +125,8 @@ int main(int argc, char *argv[]) {
 		if ((bytes < 0) || (bytes == 0)) break;
 		printf("RECEIVED --> %s \n",receive_buffer);
 
+        //distract required pieces from received packet
+        //including crc value, header, seqnum, data
         memset(message,0,sizeof(message));
         memset(header,0,sizeof(header));
         memset(data,0,sizeof(data));
@@ -127,6 +138,7 @@ int main(int argc, char *argv[]) {
         seqnum = get_seqnum_op_header_data(message,header,data);
         //printf("crc_rcv-%d-\nheader-%s-\nseqnum-%d-\ndata-%s\n",crc_rcv,header,seqnum,data);
 
+        //GBN receiver mechanism
         if(crc_rcv==crc_cal){
             if(seqnum==expectseqnum){
                 if(strcmp(header,"PACKET")==0){
@@ -152,31 +164,6 @@ int main(int argc, char *argv[]) {
             printf("crc not match\n");
             send_unreliably(s,send_buffer,remoteaddr);
         }
-
-/*
-		if (strncmp(receive_buffer,"PACKET",6)==0)  {
-			sscanf(receive_buffer, "PACKET %d",&counter);
-			sprintf(send_buffer,"ACKNOW %d \r\n",counter);
-			send_unreliably(s,send_buffer,remoteaddr);
-			save_line_without_header(receive_buffer,fout);
-		}
-		else {
-			if (strncmp(receive_buffer,"CLOSE",5)==0)  {
-                fclose(fout);
-				closesocket(s);
-				printf("Server saved file1_saved.txt \n");//you have to manually check to see if this file is identical to file1.txt
-				exit(0);
-			}
-			else {
-                //printf("send nothing\n");
-			    memset(send_buffer,0,sizeof(send_buffer));
-                sprintf(send_buffer,"hehehe %s", receive_buffer);
-                send_unreliably(s,send_buffer,remoteaddr);//it is not PACKET nor CLOSE, therefore there might be a damaged packet
-			//in this assignment, CLOSE always arrive (read UDP_supporting_functions_2012.c to see why...)
-			//do nothing, ignoring the damaged packet? Or send a negative ACK? It is up to you to decide.
-			}
-		}
-*/
 	}
 //end+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	closesocket(s);
